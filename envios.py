@@ -1,3 +1,21 @@
+def get_tipo(tipo):
+        if tipo in (0, 1, 2):
+            return "Carta Simple"
+        elif tipo in (3, 4):
+            return "Carta Certificada"
+        elif tipo in (5, 6):
+            return "Carta Expresa"
+
+        return "Tipo de carta desconocido"
+
+def get_pago(pago):
+        if pago == 1:
+            return "Efectivo"
+        elif pago == 2:
+            return "Tarjeta de crédito"
+
+        return "Forma de pago desconocida"
+
 class Envio:
     def __init__(self, cp, direccion, tipo, pago):
         self.cp = cp
@@ -9,27 +27,41 @@ class Envio:
         envio = "Código Postal: " + self.cp
         envio += " - País: " + self.get_pais()
         envio += " - Dirección: " + self.direccion
-        envio += " - Tipo de envio: " + self.get_tipo()
-        envio += " - Forma de Pago: " + self.get_pago()
+        envio += " - Tipo de envio: " + get_tipo(self.tipo) + "(tipo {0})".format(self.tipo)
+        envio += " - Forma de Pago: " + get_pago(self.pago)
         return envio
 
-    def get_pago(self):
-        if self.pago == 1:
-            return "Efectivo"
-        elif self.pago == 2:
-            return "Tarjeta de crédito"
+    def calcular_importe_final(self):
+        destino = self.get_pais()
+        cp, tipo, pago = self.cp, self.tipo, self.pago
 
-        return "Forma de pago desconocida"
+        importes = (1100, 1800, 2450, 8300, 10900, 14300, 17900)
+        monto = importes[tipo]
 
-    def get_tipo(self):
-        if self.tipo in (0, 1, 2):
-            return "Carta Simple"
-        elif self.tipo in (3, 4):
-            return "Carta Certificada"
-        elif self.tipo in (5, 6):
-            return "Carta Expresa"
+        if destino == 'Argentina':
+            inicial = monto
+        else:
+            if destino == 'Bolivia' or destino == 'Paraguay' or (destino == 'Uruguay' and cp[0] == '1'):
+                inicial = int(monto * 1.20)
+            elif destino == 'Chile' or (destino == 'Uruguay' and cp[0] != '1'):
+                inicial = int(monto * 1.25)
+            elif destino == 'Brasil':
+                if cp[0] == '8' or cp[0] == '9':
+                    inicial = int(monto * 1.20)
+                else:
+                    if cp[0] == '0' or cp[0] == '1' or cp[0] == '2' or cp[0] == '3':
+                        inicial = int(monto * 1.25)
+                    else:
+                        inicial = int(monto * 1.30)
+            else:
+                inicial = int(monto * 1.50)
 
-        return "Tipo de carta desconocido"
+        final = inicial
+
+        if pago == 1:
+            final = int(0.9 * inicial)
+
+        return final
 
     def get_pais(self):
         cp = self.cp
